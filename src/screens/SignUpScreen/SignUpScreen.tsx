@@ -1,22 +1,28 @@
-import React, {useCallback, useState} from 'react';
+import React, {useCallback} from 'react';
+import {FieldValue, useForm} from 'react-hook-form';
 import {ScrollView, StyleSheet, Text, View} from 'react-native';
 import CustomButton from '../../components/CustomButton';
 import CustomInput from '../../components/CustomInput';
 import {SocialSignInButtons} from '../../components/SocialButton';
 import useAuthNavigation from '../../hooks/useAuthNavigation';
+import {
+  emailValidationRules,
+  passwordValidationRules,
+} from '../../utils/validationRules';
 
 interface SignUpScreenProps {}
 
 export default function SignUpScreen({}: SignUpScreenProps): React.ReactElement {
-  const [password, setPassword] = useState('');
-  const [passwordConfirm, setPasswordConfirm] = useState('');
-  const [username, setUsername] = useState('');
-  const [email, setEmail] = useState('');
   const navigation = useAuthNavigation();
 
-  const onSignUpPressed = useCallback(() => {
-    navigation.navigate('confirmEmail');
-  }, [navigation]);
+  const onSignUpPressed = useCallback(
+    (data: FieldValue<{username?: string; password?: string}>) => {
+      console.log(data);
+
+      navigation.navigate('confirmEmail');
+    },
+    [navigation],
+  );
   const onSignInPressed = useCallback(() => {
     navigation.navigate('signIn');
   }, [navigation]);
@@ -27,30 +33,43 @@ export default function SignUpScreen({}: SignUpScreenProps): React.ReactElement 
     console.warn('privacy policy');
   }, []);
 
+  const {control, handleSubmit, watch} = useForm();
+  const pwd = watch('password');
+
   return (
     <ScrollView showsVerticalScrollIndicator={false}>
       <View style={styles.container}>
         <Text style={styles.title}>Create an Account</Text>
+        <CustomInput name="username" placeholder="Username" control={control} />
         <CustomInput
-          placeholder="Username"
-          text={username}
-          setText={setUsername}
+          placeholder="email"
+          name="email"
+          keyboardType="email-address"
+          control={control}
+          rules={emailValidationRules}
         />
-        <CustomInput placeholder="email" text={email} setText={setEmail} />
         <CustomInput
           placeholder="Password"
-          text={password}
-          setText={setPassword}
+          name="password"
+          control={control}
+          rules={passwordValidationRules}
           secure
         />
         <CustomInput
           placeholder="Confirm Password"
-          text={passwordConfirm}
-          setText={setPasswordConfirm}
+          name="confirm"
+          control={control}
+          rules={{
+            ...passwordValidationRules,
+            validate: value => value === pwd || 'Passwords do not match',
+          }}
           secure
         />
 
-        <CustomButton title="Register" onPress={onSignUpPressed} />
+        <CustomButton
+          title="Register"
+          onPress={handleSubmit(onSignUpPressed)}
+        />
         <View style={styles.textContainer}>
           <Text style={styles.text}>
             By registering, you confirm that you accept our{' '}

@@ -1,35 +1,52 @@
-import React, {useCallback} from 'react';
-import {StyleSheet, TextInput, View} from 'react-native';
+import React from 'react';
+import {Control, Controller, FieldValues} from 'react-hook-form';
+import {StyleSheet, Text, TextInput, TextInputProps, View} from 'react-native';
+import {RulesType} from '../../utils/validationRules';
 
-interface CustomInputProps {
+interface CustomInputProps extends Pick<TextInputProps, 'keyboardType'> {
   placeholder: string;
-  text: string;
-  setText: (text: string) => void;
+  name: string;
   secure?: boolean;
+  control: Control<FieldValues, any>;
+  rules?: RulesType;
+  errorText?: string;
 }
 
 function CustomInput({
   placeholder,
-  text,
-  setText,
+  control,
+  name,
+  errorText,
+  keyboardType = 'default',
   secure = false,
+  rules = {},
 }: CustomInputProps): React.ReactElement {
-  const onTextChange = useCallback(
-    (value: string) => {
-      setText(value);
-    },
-    [setText],
-  );
   return (
-    <View style={styles.container}>
-      <TextInput
-        value={text}
-        style={styles.input}
-        placeholder={placeholder}
-        onChangeText={onTextChange}
-        secureTextEntry={secure}
+    <>
+      <Controller
+        rules={rules}
+        control={control}
+        name={name}
+        render={({field: {value, onChange, onBlur}, fieldState: {error}}) => (
+          <>
+            <View style={[styles.container, error && styles.errorInput]}>
+              <TextInput
+                value={value}
+                style={[styles.input]}
+                placeholder={placeholder}
+                onChangeText={onChange}
+                secureTextEntry={secure}
+                onBlur={onBlur}
+                keyboardType={keyboardType}
+              />
+            </View>
+            {error && (
+              <Text style={styles.errorText}>{error.message || errorText}</Text>
+            )}
+          </>
+        )}
       />
-    </View>
+    </>
   );
 }
 
@@ -47,5 +64,13 @@ const styles = StyleSheet.create({
   },
   input: {
     fontSize: 12,
+  },
+  errorInput: {
+    borderColor: 'red',
+    borderWidth: 1,
+  },
+  errorText: {
+    color: 'red',
+    alignSelf: 'stretch',
   },
 });

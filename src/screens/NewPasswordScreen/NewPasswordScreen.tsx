@@ -1,22 +1,28 @@
-import React, {useCallback, useState} from 'react';
+import React, {useCallback} from 'react';
+import {FieldValue, useForm} from 'react-hook-form';
 import {ScrollView, StyleSheet, Text, View} from 'react-native';
+
 import CustomButton from '../../components/CustomButton';
 import CustomInput from '../../components/CustomInput';
 import useAuthNavigation from '../../hooks/useAuthNavigation';
+import {passwordValidationRules} from '../../utils/validationRules';
 
 interface NewPasswordScreenProps {}
 
 export default function NewPasswordScreen({}: NewPasswordScreenProps): React.ReactElement {
-  const [code, setCode] = useState('');
-  const [newPassword, setNewPassword] = useState('');
+  const {control, handleSubmit} = useForm();
   const navigation = useAuthNavigation();
   const onBackToSignInPressed = useCallback(() => {
     console.warn('back to sign in');
     navigation.navigate('signIn');
   }, [navigation]);
-  const onSubmitPressed = useCallback(() => {
-    navigation.navigate('signIn');
-  }, [navigation]);
+  const onSubmitPressed = useCallback(
+    (data: FieldValue<{code?: string; newPassword?: string}>) => {
+      console.log(data);
+      navigation.navigate('signIn');
+    },
+    [navigation],
+  );
 
   return (
     <ScrollView showsVerticalScrollIndicator={false}>
@@ -24,16 +30,22 @@ export default function NewPasswordScreen({}: NewPasswordScreenProps): React.Rea
         <Text style={styles.title}>Reset your password</Text>
 
         <Text>Code *</Text>
-        <CustomInput placeholder="code" text={code} setText={setCode} />
+        <CustomInput
+          placeholder="code"
+          keyboardType="numeric"
+          name="code"
+          control={control}
+        />
         <Text>New Password *</Text>
         <CustomInput
           placeholder="Enter your new password"
-          text={newPassword}
-          setText={setNewPassword}
+          name="newPassword"
+          control={control}
+          rules={passwordValidationRules}
           secure
         />
 
-        <CustomButton title="Submit" onPress={onSubmitPressed} />
+        <CustomButton title="Submit" onPress={handleSubmit(onSubmitPressed)} />
 
         <CustomButton
           title="Back to Sign In"

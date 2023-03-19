@@ -1,4 +1,6 @@
-import React, {useCallback, useState} from 'react';
+import React, {useCallback} from 'react';
+import {useForm} from 'react-hook-form';
+import {FieldValue} from 'react-hook-form/dist/types';
 import {ScrollView, StyleSheet, Text, View} from 'react-native';
 import CustomButton from '../../components/CustomButton';
 import CustomInput from '../../components/CustomInput';
@@ -7,15 +9,19 @@ import useAuthNavigation from '../../hooks/useAuthNavigation';
 interface ResetPasswordScreenProps {}
 
 export default function ResetPasswordScreen({}: ResetPasswordScreenProps): React.ReactElement {
-  const [username, setUsername] = useState('');
+  const {control, handleSubmit} = useForm();
   const navigation = useAuthNavigation();
 
   const onBackToSignInPressed = useCallback(() => {
     navigation.goBack();
   }, [navigation]);
-  const onSendPressed = useCallback(() => {
-    console.warn('confirm');
-  }, []);
+  const onSendPressed = useCallback(
+    (data: FieldValue<{username?: string}>) => {
+      console.log(data);
+      navigation.navigate('newPassword');
+    },
+    [navigation],
+  );
 
   return (
     <ScrollView showsVerticalScrollIndicator={false}>
@@ -23,13 +29,9 @@ export default function ResetPasswordScreen({}: ResetPasswordScreenProps): React
         <Text style={styles.title}>Reset your password</Text>
 
         <Text>Username *</Text>
-        <CustomInput
-          placeholder="Username"
-          text={username}
-          setText={setUsername}
-        />
+        <CustomInput placeholder="Username" name="username" control={control} />
 
-        <CustomButton title="Send" onPress={onSendPressed} />
+        <CustomButton title="Send" onPress={handleSubmit(onSendPressed)} />
 
         <CustomButton
           title="Back to Sign In"

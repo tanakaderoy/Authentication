@@ -1,14 +1,14 @@
-import React, {useCallback, useState} from 'react';
+import React, {useCallback} from 'react';
+import {FieldValue, useForm} from 'react-hook-form';
 import {ScrollView, StyleSheet, Text, View} from 'react-native';
 import CustomButton from '../../components/CustomButton';
 import CustomInput from '../../components/CustomInput';
 import useAuthNavigation from '../../hooks/useAuthNavigation';
+import {usernameValidationRules} from '../../utils/validationRules';
 
 interface ConfirmEmailScreenProps {}
 
 export default function ConfirmEmailScreen({}: ConfirmEmailScreenProps): React.ReactElement {
-  const [code, setCode] = useState('');
-  const [username, setUsername] = useState('');
   const navigation = useAuthNavigation();
 
   const onResendPressed = useCallback(() => {
@@ -17,9 +17,15 @@ export default function ConfirmEmailScreen({}: ConfirmEmailScreenProps): React.R
   const onBackToSignInPressed = useCallback(() => {
     navigation.popToTop();
   }, [navigation]);
-  const onConfirmPressed = useCallback(() => {
-    navigation.navigate('home');
-  }, [navigation]);
+  const onConfirmPressed = useCallback(
+    (data: FieldValue<{username?: string; code?: string}>) => {
+      console.log(data);
+      navigation.navigate('home');
+    },
+    [navigation],
+  );
+
+  const {control, handleSubmit} = useForm();
 
   return (
     <ScrollView showsVerticalScrollIndicator={false}>
@@ -28,18 +34,23 @@ export default function ConfirmEmailScreen({}: ConfirmEmailScreenProps): React.R
 
         <Text>Username *</Text>
         <CustomInput
+          name={'username'}
+          rules={usernameValidationRules}
+          control={control}
           placeholder="Username"
-          text={username}
-          setText={setUsername}
         />
         <Text>Confirmation Code *</Text>
         <CustomInput
+          name="code"
+          keyboardType="numeric"
           placeholder="Enter your confirmation code"
-          text={code}
-          setText={setCode}
+          control={control}
         />
 
-        <CustomButton title="Confirm" onPress={onConfirmPressed} />
+        <CustomButton
+          title="Confirm"
+          onPress={handleSubmit(onConfirmPressed)}
+        />
         <CustomButton
           title="Resend Code"
           type="secondary"
