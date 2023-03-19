@@ -1,8 +1,9 @@
+import {withAuthenticator} from 'aws-amplify-react-native';
 import React from 'react';
 import {SafeAreaView, StyleSheet} from 'react-native';
 import Navigation from './src/components/navigation';
 
-export default function App(): React.ReactElement {
+function App(): React.ReactElement {
   return (
     <SafeAreaView style={styles.root}>
       <Navigation />
@@ -16,3 +17,5 @@ const styles = StyleSheet.create({
     backgroundColor: '#F9FBFC',
   },
 });
+
+export default withAuthenticator(App);
